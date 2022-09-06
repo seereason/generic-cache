@@ -11,14 +11,16 @@
 {-# OPTIONS -Wall #-}
 
 module Data.GenericCache
-  ( GenericCache
+  ( -- * Cache type
+    GenericCache
   , HasGenericCache(genericCache)
-  -- * Generic lens functions
+    -- * Lens functions
   , anyLens
   , maybeLens
+    -- * Map lens functions
   , atLens
   , mapLens
-  -- * Tests
+    -- * Tests
   , tests
   ) where
 
