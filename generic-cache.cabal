@@ -1,0 +1,26 @@
+Name:                generic-cache
+Version:             1.1
+Synopsis:            Safe generic caching
+Description:         Create lenses into a type safe generic cache using Dynamic.
+License:             MIT
+Copyright:           Copyright (c) 2022 David Fox
+Author:              David Fox
+Maintainer:          dsf@seereason.com
+Stability:           experimental
+Homepage:            http://github.com/seereason/generic-cache
+Tested-With:         GHC ==8.6.5
+Build-Type:          Simple
+Cabal-Version:       >= 1.10
+
+Library
+  Build-Depends: base, containers, lens, HUnit
+  Exposed-Modules: Data.GenericCache
+  Hs-Source-Dirs: src
+
+Test-Suite cache-tests
+  default-language: Haskell2010
+  type: exitcode-stdio-1.0
+  ghc-options: -Wall -O
+  hs-source-dirs: tests
+  main-is: Main.hs
+  build-depends: base, containers, extra, HUnit, QuickCheck, generic-cache >= 1.1
