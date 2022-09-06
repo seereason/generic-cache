@@ -81,7 +81,7 @@ atLens k = mapLens . at k
 -- | Access the whole map that 'atLens' provides element access to:
 --
 -- @
---     > view (mapLens @Char @String) $
+--     > view (mapLens \@Char \@String) $
 --         atLens \'x\' .~ Just "hello" $
 --           atLens \'y\' .~ Just "world" $
 --             (mempty :: GenericCache)
