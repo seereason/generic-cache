@@ -67,7 +67,7 @@ dynamicLens d =
 --
 -- @
 -- > view (anyLens \'a\') $ (anyLens \'a\' %~ succ . succ) (mempty :: GenericCache)
--- 'c'
+-- \'c\'
 -- @
 anyLens :: forall a s. (HasGenericCache s, Typeable a, HasCallStack) => a -> Lens' s a
 anyLens a = genericCache @s . dynamicLens a
