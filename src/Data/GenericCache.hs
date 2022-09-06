@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -24,7 +25,7 @@ module Data.GenericCache
   , tests
   ) where
 
-import Control.Lens (At(at), Iso', iso, Lens')
+import Control.Lens (At(at), Index, IxValue, Iso', iso, Lens')
 import Data.Dynamic (Dynamic, fromDynamic, toDyn)
 import Data.Map.Strict (Map)
 import Data.Maybe (fromMaybe)
@@ -77,8 +78,21 @@ maybeLens :: forall a s. (HasGenericCache s, Typeable a) => Lens' s (Maybe a)
 maybeLens = anyLens @(Maybe a) @s Nothing
 
 -- | An 'At' lens to an element of a map.
-atLens :: forall k v s. (HasGenericCache s, Typeable k, Ord k, Typeable v, HasCallStack) => k -> Lens' s (Maybe v)
-atLens k = mapLens . at k
+atLens ::
+  forall map k v s.
+  (HasGenericCache s,
+   At map,
+   k ~ Index map,
+   v ~ IxValue map,
+   Typeable map,
+   Monoid map,
+   Typeable k,
+   Ord k,
+   Typeable v,
+   HasCallStack)
+  => k
+  -> Lens' s (Maybe v)
+atLens k = mapLens @map . at k
 
 -- | Access the whole map that 'atLens' provides element access to:
 --
@@ -89,17 +103,28 @@ atLens k = mapLens . at k
 --             (mempty :: GenericCache)
 --     fromList [(\'x\',"hello"),(\'y\',"world")]
 -- @
-mapLens :: forall k v s. (HasGenericCache s, Typeable k, Ord k, Typeable v, HasCallStack) => Lens' s (Map k v)
+mapLens ::
+  forall map k v s.
+  (HasGenericCache s,
+   At map,
+   k ~ Index map,
+   v ~ IxValue map,
+   Typeable map,
+   Monoid map,
+   Typeable k,
+   Ord k,
+   Typeable v,
+   HasCallStack)
+  => Lens' s map
 mapLens = anyLens mempty
 
 -- runTestTT tests
 tests :: Test
 tests =
-  let m = set (mapLens @Char @Int) (fromList [('a',3),('b',5)] :: Map Char Int) (mempty :: GenericCache)
-      m2 = set (mapLens @Int @Char) (fromList [(4,'a'),(7,'b')] :: Map Int Char) m
+  let m = set (mapLens @(Map Char Int)) (fromList [('a',3),('b',5)]) (mempty :: GenericCache)
+      m2 = set (mapLens @(Map Int Char)) (fromList [(4,'a'),(7,'b')]) m
   in TestList
-     [ TestCase (assertEqual "a" (fromList [('a',3),('b',5)]) (view (mapLens @Char @Int) m2))
-     , TestCase (assertEqual "b" (fromList [('a',3),('b',5)]) (view (mapLens @Char @Int) m2))
-     , TestCase (assertEqual "c" (Just 5) (view (atLens @Char @Int 'b') m2))
-     , TestCase (assertEqual "d" (Just 5) (view (mapLens @Char @Int . at 'b') m2))
-     , TestCase (assertEqual "e" Nothing (view (atLens @Char @Int 'x') m2)) ]
+     [ TestCase (assertEqual "test1" (fromList [('a',3),('b',5)]) (view (mapLens @(Map Char Int)) m2))
+     , TestCase (assertEqual "test2" (Just 5) (view (atLens @(Map Char Int) 'b') m2))
+     , TestCase (assertEqual "test3" (Just 5) (view (mapLens @(Map Char Int) . at 'b') m2))
+     , TestCase (assertEqual "test4" Nothing (view (atLens @(Map Char Int) 'x') m2)) ]
